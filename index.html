@@ -1,341 +1,139 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <style>
-            canvas {
-                border:1px solid #d3d3d3;
-                background-color: #f1f1f1;
-                /* padding-left: 0;
-                padding-right: 0; */
-                /* margin-left: auto; */
-                /* margin-right: auto; */
-                display: block;
-            }
-        </style>
-    </head>
-    <body onload="startMenu()">
-        <script>
-
-        function startMenu(){
-            
-            startGame();
-            // myBackground.y = 111;
-            // myBackground.update();
-
-            wallpaper = new component(500, 800, "track.png", 0, 0, "image");
-            wallpaper.update();
-
-            Welcome = new component(200, 100, "", 30, 50, "text");
-            Welcome.text = "Welcome To 8 Bit Street Racer";
-            Welcome.update();
-
-            best = new component(200, 100, "", 150, 170, "text");
-            best.text = "Highscore: " + highscore;
-            best.update();
-
-            instructions = new component(200, 100, "", 30, 430, "text");
-            instructions.text = "Use Arrow Keys To avoid Cars";
-            instructions.update();
-
-            score = new component(200, 100, "", 150, 260, "text");
-            if(myGameArea.frameNo){
-            score.text = "Score: " + myGameArea.frameNo;
-            }
-            else{
-                score.text = "Score: 0";
-            }
-            score.update();
-
-            playbtn = new component(200, 100, "", 150, 470, "button");
-            playbtn.update();
-            play = new component(200, 100, "", 205, 530, "text");
-            play.text = "PLAY!";
-            play.update();
-
-            by = new component(200, 100, "", 90, 780, "text");
-            by.text = "Made By Samer Safadi";
-            by.update();
-
-        }
-        
-        var myGamePiece;
-        var myBackground;
-        var myObstacles = [];
-        // var myScore;
-        var interval;
-        var newCarAtEveryNthFrame = 100;
-        var highscore = 0;
-        var cars = ["F1_Cars/red.png", 
-                    "F1_Cars/blue.png",
-                    "F1_Cars/green.png", 
-                    "F1_Cars/pink.png",
-                    "F1_Cars/purple.png", 
-                    "F1_Cars/yellow.png",
-                    "F1_Cars/batmobile.png"];
-        var npcs = ["cars/green.png", 
-                    "cars/red.png", 
-                    "cars/purple.png",
-                    "cars/orange.png", 
-                    "cars/blue.png", 
-                    "cars/pink.png", 
-                    "cars/yellow.png", 
-                    "cars/white.png", 
-                    "cars/grey.png", 
-                    "cars/brown.png"];
-        var randomCar = Math.floor(Math.random()*cars.length);
-        function randomNpc() {
-            var c = npcs[Math.floor(Math.random()*npcs.length)];
-            return c;
-        } 
-        
-        function startGame() {
-            myGamePiece = new component(100, 200, cars[randomCar], 200, 550, "image");
-            myBackground = new component(500, 1600, "track.png", 0, -800, "background");
-            myScore = new component(200, 100, "", 10, 40, "text");
-            myGameArea.prepare();
-        }
-        
-        var myGameArea = {
-            canvas : document.createElement("canvas"),
-            prepare : function() {
-                myScore.text = 0;
-                this.canvas.width = 500;
-                this.canvas.height = 800;
-                this.context = this.canvas.getContext("2d");
-                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-                window.addEventListener('mousedown', function (e) {
-                    myGameArea.x = e.pageX;
-                    myGameArea.y = e.pageY;
-                })
-                window.addEventListener('mouseup', function (e) {
-                    myGameArea.x = false;
-                    myGameArea.y = false;
-                })
-                //this.frameNo = 0;
-                this.interval = setInterval(startbtn, 20);
-                // window.addEventListener('keydown', function (e) {
-                //     e.preventDefault();
-                //     myGameArea.keys = (myGameArea.keys || []);
-                //     myGameArea.keys[e.keyCode] = (e.type == "keydown");
-                // })
-                // window.addEventListener('keyup', function (e) {
-                //     myGameArea.keys[e.keyCode] = (e.type == "keydown");
-                // })
-            },
-            start : function() {
-                // this.canvas.width = 500;
-                // this.canvas.height = 800;
-                // this.context = this.canvas.getContext("2d");
-                // document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-                this.frameNo = 0;
-                this.interval = setInterval(updateGameArea, 20);
-                window.addEventListener('keydown', function (e) {
-                    e.preventDefault();
-                    myGameArea.keys = (myGameArea.keys || []);
-                    myGameArea.keys[e.keyCode] = (e.type == "keydown");
-                })
-                window.addEventListener('keyup', function (e) {
-                    myGameArea.keys[e.keyCode] = (e.type == "keydown");
-                })
-            },
-            clear : function() {
-                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            },
-            stop : function() {
-                clearInterval(this.interval);
-            }
-        }
-        function startbtn(){
-            
-            if (myGameArea.x && myGameArea.y) {
-                //console.log(playbtn.clicked());
-                if (playbtn.clicked()) {
-                   // console.log("Clicked");
-                    myGameArea.stop();
-                    myGameArea.start();
-                }
-            }
-        }
-
-        function component(width, height, imgsrc, x, y, type) {
-            this.type = type;
-            this.image = new Image();
-            this.image.src = imgsrc;
-            this.width = width;
-            this.height = height;
-            this.speedX = 0;
-            this.speedY = 0; 
-            this.x = x;
-            this.y = y; 
-            ctx = myGameArea.context;   
-            this.update = function() {
-                if (type == "image" || type == "background" || type == "npc") {
-                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                    if (type == "background") {
-                        ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
-                    }
-                } 
-                else if (type == "text"){
-                    ctx.font = "Bold 30px Arial";
-                    ctx.fillStyle = "black";
-                    ctx.fillText(this.text, this.x, this.y);
-                } 
-                else if (type == "button"){
-                    ctx.fillStyle = "red";
-                    ctx.fillRect(this.x, this.y, this.width, this.height);
-                }
-            }
-            this.clicked = function() {
+<html  >
+<head>
+  <!-- Site made with Mobirise Website Builder v5.1.4, https://mobirise.com -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Mobirise v5.1.4, mobirise.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <link rel="shortcut icon" href="assets/images/ezgif.com-gif-maker-96x73.png" type="image/x-icon">
+  <meta name="description" content="">
+  
+  
+  <title>Home</title>
+  <link rel="stylesheet" href="assets/tether/tether.min.css">
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-grid.min.css">
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-reboot.min.css">
+  <link rel="stylesheet" href="assets/dropdown/css/style.css">
+  <link rel="stylesheet" href="assets/socicon/css/styles.css">
+  <link rel="stylesheet" href="assets/theme/css/style.css">
+  <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css" type="text/css">
+  
+  
+  
+  
+</head>
+<body>
+  
+  <section class="menu cid-s48OLK6784" once="menu" id="menu1-h">
+    
+    <nav class="navbar navbar-dropdown navbar-fixed-top navbar-expand-lg">
+        <div class="container">
+            <div class="navbar-brand">
+                <span class="navbar-logo">
+                    <a href="https://mobiri.se">
+                        <img src="assets/images/ezgif.com-gif-maker-96x73.png" alt="Mobirise" style="height: 3.8rem;">
+                    </a>
+                </span>
+                <span class="navbar-caption-wrap"><a class="navbar-caption text-black display-7" href="https://mobiri.se">Samer Safadi</a></span>
+            </div>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav nav-dropdown nav-right" data-app-modern-menu="true"><li class="nav-item"><a class="nav-link link text-black text-primary display-4" href="https://samersafadi.github.io" target="_blank">
+                            GitHub</a></li><li class="nav-item"><a class="nav-link link text-black text-primary display-4" href="http://www.linkedin.com/in/samersafadi" target="_blank">Linkedin</a></li><li class="nav-item"><a class="nav-link link text-black text-primary display-4" href="mailto:safadisamerman@gmail.com">Contact</a></li></ul>
                 
-                var left = this.x + 10;
-                var right = this.x + (this.width)+ 10;
-                var top = this.y+ 10;
-                var bottom = this.y + (this.height)+ 10;
-                var clicked = true;
-                if ((bottom < myGameArea.y) || (top > myGameArea.y) || (right < myGameArea.x) || (left > myGameArea.x)) {
-                    clicked = false;
-                }
-                return clicked;
-            }
-            this.newPos = function() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    if (this.type == "background") {
-                        if (this.y == -(this.y)) {
-                            this.y = -800;
-                        }
-                    }
-                    if (this.type == "npc") {
-                        if (this.y > 1200) {
-                            myObstacles.shift();
-                        }
-                    }
-                } 
-            this.crashWith = function(otherobj) {
-                var myleft = this.x + 15;
-                var myright = this.x  - 15 + (this.width);
-                var mytop = this.y + 30;
-                var mybottom = this.y - 20 + (this.height);
-                var otherleft = otherobj.x;
-                var otherright = otherobj.x + (otherobj.width);
-                var othertop = otherobj.y;
-                var otherbottom = otherobj.y + (otherobj.height);
-                var crash = true;
-                if ((mybottom < othertop) || (mytop > otherbottom) || 
-                    (myright < otherleft) || (myleft > otherright)) {
-                    crash = false;
-                }
-                return crash;
-            }   
-        }
+                
+            </div>
+        </div>
+    </nav>
 
-        function getRandomizer(min, max) {
-            return Math.floor(Math.random() * (max - min) + min);
-        }
+</section>
 
-        function everyinterval(n) {
-            if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
-            return false;
-        }
-        
-        function updateGameArea() {
-            for (i = 0; i < myObstacles.length; i += 1) {
-                if (myGamePiece.crashWith(myObstacles[i])) {
+<section class="header1 cid-s48MCQYojq mbr-fullscreen mbr-parallax-background" id="header1-f">
+
+    
+
+    <div class="mbr-overlay" style="opacity: 0.8; background-color: rgb(255, 255, 255);"></div>
+
+    <div class="align-center container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <h1 class="mbr-section-title mbr-fonts-style mb-3 display-1"><strong>HELLO :)</strong></h1>
+                
+                <p class="mbr-text mbr-fonts-style display-7">Hi, my name is Samer Safadi, and I am currently a student studying Computer Science at John Abbott College in Montreal. Cars and programming are two of my greatest passions, so that what i work on on my free time.<br><br>I always found it crazy that game developers can make their own universe just on their computer. So in grade 9 I started to look into programming and I started to follow a tutorial on Khan Academy, and I got addicted. After that, I entered John Abbott in Computer Science and I love it.<br><br></p>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content6 cid-sba4qT0Eq8" id="content6-m">
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-12 col-lg-10">
+                <hr class="line">
+                <p class="mbr-text align-center mbr-fonts-style my-4 display-1">
+                    <em><strong>Projects</strong></em></p>
+                <hr class="line">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content1 cid-s48udlf8KU" id="content1-8">
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="title col-12 col-md-9">
+                <h3 class="mbr-section-title mbr-fonts-style align-center mb-4 display-2"><strong>8 Bit Racer</strong></h3>
+                <h4 class="mbr-section-subtitle align-center mbr-fonts-style mb-4 display-7">Drive as fast as you possibly can in some of the fastest cars in the world, but watch out for traffic, one hit with another driver and its all over.</h4>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="image3 cid-s48upRUlSD" id="image3-9">
+    
+
+    
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9">
+                <div class="image-wrapper">
+                    <a href="http://google.ca"><img src="assets/images/cover-1-1500x2047.png" alt="Mobirise"></a>
                     
-                    myGameArea.stop();
-                    myGameArea.clear();
-                    myObstacles = [];
-                    if(myGameArea.frameNo > highscore){
-                        highscore = myGameArea.frameNo;
-                    }
-                    startMenu();
-                    return;
-                }
-            }
-            
-            myGameArea.frameNo += 1;
-            
-            if (myGameArea.frameNo == 1) {
-                newCarAtEveryNthFrame = 100;
-                interval = getRandomizer(-700, -200)
-            }
-            else if (myGameArea.frameNo == 300) { newCarAtEveryNthFrame = 75; }
-            else if (myGameArea.frameNo == 500) { newCarAtEveryNthFrame = 55; }
-            else if((myGameArea.frameNo % 500) == 0){
-                if(newCarAtEveryNthFrame > 25){ newCarAtEveryNthFrame -= 5; }
-            }
-            if ((myGameArea.frameNo % newCarAtEveryNthFrame) == 0) {
-                var xPosition;
-                var spawn = true;
-                xPosition = getRandomizer(1, 399);
-                var noWhereToSpawnCounter = 0;
-                for (i = 0; i < myObstacles.length; i++) {
-                    if(myObstacles[i].y < 300){
-                        if (xPosition < (myObstacles[i].x + myObstacles[i].width) && (xPosition + myObstacles[i].width) > myObstacles[i].x ) {
-                            xPosition = getRandomizer(5, 395);
-                            i = -1;
-                            noWhereToSpawnCounter++;
-                        }
-                    }
-                    else{
-                        spawn = true;
-                    }
-                    if(noWhereToSpawnCounter > 10){
-                        spawn = false
-                        return;
-                    }
-                }
-                if(spawn){
-                    myObstacles.push(new component(100, 200, randomNpc(), xPosition, interval, "npc"));
-                    myObstacles[myObstacles.length-1].speedY = getRandomizer(8,12);
-                }
-            }
-            myGameArea.clear();
-            
-            if (myGameArea.keys && myGameArea.keys[37]) {
-                if(myGamePiece.x < 0)
-                    myGamePiece.speedX = 0;
-                else
-                    myGamePiece.speedX += -8;
-            }
-            if (myGameArea.keys && myGameArea.keys[39]){
-                if(myGamePiece.x > 400)
-                    myGamePiece.speedX = 0;
-                else
-                    myGamePiece.speedX += 8;
-            }
-            if (myGameArea.keys && myGameArea.keys[38]) {
-                if(myGamePiece.y < 0)
-                    myGamePiece.speedY = 0;
-                else
-                    myGamePiece.speedY= -6;
-            }
-            if (myGameArea.keys && myGameArea.keys[40]) {
-                if(myGamePiece.y > 700)
-                    myGamePiece.speedY = 0;
-                else
-                    myGamePiece.speedY= 8; 
-            }
-            myGameArea.clear();
-            myBackground.speedY = 20;
-            myBackground.newPos();
-            myBackground.update();
-            for (i = 0; i < myObstacles.length; i += 1) {
-                myObstacles[i].newPos();
-                myObstacles[i].update();
-            }
-            myGamePiece.newPos();
-            myGamePiece.update();
-            myScore.text= "SCORE: " + myGameArea.frameNo;
-            myScore.update();
-            clearmove();
-        }
-        
-        function clearmove() {
-            myGamePiece.speedX = 0; 
-            myGamePiece.speedY = 0; 
-        }
-        </script>        
-    </body>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="footer7 cid-sb9Xl1mJDE" once="footers" id="footer7-l">
+
+    
+
+    
+
+    <div class="container">
+        <div class="media-container-row align-center mbr-white">
+            <div class="col-12">
+                <p class="mbr-text mb-0 mbr-fonts-style display-7"></p>
+            </div>
+        </div>
+    </div>
+</section><section style="background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; color:#aaa; font-size:12px; padding: 0; align-items: center; display: flex;"><a href="https://mobirise.site/o" style="flex: 1 1; height: 3rem; padding-left: 1rem;"></a><p style="flex: 0 0 auto; margin:0; padding-right:1rem;">Develop a website - <a href="https://mobirise.site/w" style="color:#aaa;">Go now</a></p></section><script src="assets/web/assets/jquery/jquery.min.js"></script>  <script src="assets/popper/popper.min.js"></script>  <script src="assets/tether/tether.min.js"></script>  <script src="assets/bootstrap/js/bootstrap.min.js"></script>  <script src="assets/smoothscroll/smooth-scroll.js"></script>  <script src="assets/parallax/jarallax.min.js"></script>  <script src="assets/dropdown/js/nav-dropdown.js"></script>  <script src="assets/dropdown/js/navbar-dropdown.js"></script>  <script src="assets/touchswipe/jquery.touch-swipe.min.js"></script>  <script src="assets/theme/js/script.js"></script>  
+  
+  
+</body>
 </html>
